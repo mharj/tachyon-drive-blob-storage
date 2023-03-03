@@ -1,0 +1,38 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es2020",
+		"lib": [
+			"es2020"
+		],
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"moduleResolution": "node",
+		"sourceRoot": "./src",
+		"types": [
+			"node"
+		],
+		"sourceMap": true,
+		"strict": true,
+		"declaration": true,
+		"removeComments": false,
+		"inlineSources": true,
+		"inlineSourceMap": false,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noImplicitAny": true,
+		"importHelpers": true,
+		"strictNullChecks": true,
+		"noUnusedLocals": true
+	},
+	"include": [
+		"src/**/*",
+		"src/**/**/*"
+	],
+	"exclude": [
+		"node_modules",
+		"**/*.spec.ts",
+		"test"
+	]
+}
