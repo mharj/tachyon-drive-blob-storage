@@ -27,7 +27,13 @@ const processor = new CryptoBufferProcessor(Buffer.from('some-secret-key'));
 const emulatorStorageConnectionString = 'UseDevelopmentStorage=true';
 
 const driverSet = new Set<IStorageDriver<Data>>([
-	new AzureBlobStorageDriver('AzureBlobStorageDriver', emulatorStorageConnectionString, 'test', 'test.json', bufferSerializer),
+	new AzureBlobStorageDriver(
+		'AzureBlobStorageDriver',
+		async () => emulatorStorageConnectionString,
+		async () => 'test',
+		async () => 'test.json',
+		bufferSerializer,
+	),
 	new AzureBlobStorageDriver('CryptAzureBlobStorageDriver', emulatorStorageConnectionString, 'test', 'test.aes', bufferSerializer, processor),
 ]);
 
