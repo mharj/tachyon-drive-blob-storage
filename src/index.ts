@@ -1,5 +1,6 @@
-import {ILoggerLike, IPersistSerializer, IStoreProcessor, StorageDriver} from 'tachyon-drive';
 import {BlobServiceClient, BlockBlobClient, ContainerClient} from '@azure/storage-blob';
+import {IPersistSerializer, IStoreProcessor, StorageDriver} from 'tachyon-drive';
+import type {ILoggerLike} from '@avanio/logger-like';
 
 type StringOrAsyncString = string | (() => Promise<string>);
 
@@ -40,6 +41,13 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 	protected async handleInit(): Promise<boolean> {
 		const containerClient = await this.getContainerClient();
 		await containerClient.createIfNotExists();
+		return true;
+	}
+
+	protected async handleUnload(): Promise<boolean> {
+		this.containerClient = undefined;
+		this.blockBlobClient = undefined;
+		this.blobServiceClient = undefined;
 		return true;
 	}
 

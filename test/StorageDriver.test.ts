@@ -1,10 +1,10 @@
-import * as zod from 'zod';
+import 'mocha';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import 'mocha';
+import * as zod from 'zod';
 import {IPersistSerializer, IStorageDriver} from 'tachyon-drive';
-import {CryptoBufferProcessor} from 'tachyon-drive-node-fs';
 import {AzureBlobStorageDriver} from '../src/';
+import {CryptoBufferProcessor} from 'tachyon-drive-node-fs';
 
 chai.use(chaiAsPromised);
 
@@ -64,6 +64,11 @@ describe('StorageDriver', () => {
 				expect(currentDriver.isInitialized).to.be.eq(false);
 				expect(await currentDriver.hydrate()).to.eq(undefined);
 				expect(currentDriver.isInitialized).to.be.eq(true);
+			});
+			it('should unload to storage driver', async () => {
+				expect(currentDriver.isInitialized).to.be.eq(true);
+				expect(await currentDriver.unload()).to.eq(true);
+				expect(currentDriver.isInitialized).to.be.eq(false);
 			});
 		});
 	});
