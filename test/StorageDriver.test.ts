@@ -24,7 +24,7 @@ const bufferSerializer: IPersistSerializer<Data, Buffer> = {
 
 const processor = new CryptoBufferProcessor(Buffer.from('some-secret-key'));
 
-const emulatorStorageConnectionString = 'UseDevelopmentStorage=true';
+const emulatorStorageConnectionString = process.env.AZURE_STORAGE_CONNECTION_STRING || 'UseDevelopmentStorage=true';
 
 const driverSet = new Set<IStorageDriver<Data>>([
 	new AzureBlobStorageDriver(
