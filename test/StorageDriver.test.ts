@@ -42,7 +42,9 @@ const data = dataSchema.parse({test: 'demo'});
 describe('StorageDriver', () => {
 	driverSet.forEach((currentDriver) => {
 		describe(currentDriver.name, () => {
-			before(async () => {
+			before(async function () {
+				this.timeout(10000);
+				await currentDriver.init();
 				await currentDriver.clear();
 				expect(currentDriver.isInitialized).to.be.eq(false);
 			});
