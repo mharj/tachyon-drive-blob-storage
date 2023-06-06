@@ -1,5 +1,5 @@
 import {BlobServiceClient, BlockBlobClient, ContainerClient} from '@azure/storage-blob';
-import {IPersistSerializer, IStoreProcessor, StorageDriver} from 'tachyon-drive';
+import {IExternalNotify, IPersistSerializer, IStoreProcessor, StorageDriver} from 'tachyon-drive';
 import type {ILoggerLike} from '@avanio/logger-like';
 
 type StringOrAsyncString = string | (() => Promise<string>);
@@ -20,6 +20,7 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 	 * @param containerName  - Azure Blob Storage container name or async function to get container name
 	 * @param fileName - Azure Blob Storage file name or async function to get file name
 	 * @param serializer - serializer to serialize and deserialize data (to and from Buffer)
+	 * @param extNotify - optional external notify service to notify store update events
 	 * @param processor - optional processor to process data (encrypt, decrypt, compress, decompress, etc.)
 	 * @param logger - optional logger
 	 */
@@ -29,10 +30,11 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 		containerName: StringOrAsyncString,
 		fileName: StringOrAsyncString,
 		serializer: IPersistSerializer<Input, Buffer>,
+		extNotify?: IExternalNotify,
 		processor?: IStoreProcessor<Buffer>,
 		logger?: ILoggerLike | Console,
 	) {
-		super(name, serializer, processor, logger);
+		super(name, serializer, extNotify || null, processor, logger);
 		this.containerName = containerName;
 		this.fileName = fileName;
 		this.connectionString = connectionString;

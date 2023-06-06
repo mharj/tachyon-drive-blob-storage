@@ -2,7 +2,7 @@ import 'mocha';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as zod from 'zod';
-import {IPersistSerializer, IStorageDriver} from 'tachyon-drive';
+import {IExternalNotify, IPersistSerializer, IStorageDriver} from 'tachyon-drive';
 import {AzureBlobStorageDriver} from '../src/';
 import {CryptoBufferProcessor} from 'tachyon-drive-node-fs';
 
@@ -22,6 +22,26 @@ const bufferSerializer: IPersistSerializer<Data, Buffer> = {
 	validator: (data: Data) => dataSchema.safeParse(data).success,
 };
 
+class SimpleNotify implements IExternalNotify {
+	private callback = new Set<(timeStamp: Date) => Promise<void>>();
+
+	public init(): Promise<void> {
+		return Promise.resolve();
+	}
+
+	public unload(): Promise<void> {
+		return Promise.resolve();
+	}
+
+	public onUpdate(callback: (timeStamp: Date) => Promise<void>): void {
+		this.callback.add(callback);
+	}
+
+	public async notifyUpdate(timeStamp: Date): Promise<void> {
+		await Promise.all([...this.callback].map((callback) => callback(timeStamp)));
+	}
+}
+
 const processor = new CryptoBufferProcessor(Buffer.from('some-secret-key'));
 
 const emulatorStorageConnectionString = process.env.AZURE_STORAGE_CONNECTION_STRING || 'UseDevelopmentStorage=true';
@@ -34,7 +54,15 @@ const driverSet = new Set<IStorageDriver<Data>>([
 		async () => 'test.json',
 		bufferSerializer,
 	),
-	new AzureBlobStorageDriver('CryptAzureBlobStorageDriver', emulatorStorageConnectionString, 'test', 'test.aes', bufferSerializer, processor),
+	new AzureBlobStorageDriver(
+		'CryptAzureBlobStorageDriver',
+		emulatorStorageConnectionString,
+		'test',
+		'test.aes',
+		bufferSerializer,
+		new SimpleNotify(),
+		processor,
+	),
 ]);
 
 const data = dataSchema.parse({test: 'demo'});
