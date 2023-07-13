@@ -9,6 +9,10 @@ env:
   # Setting an environment variable with the value of a configuration variable
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  PACKAGE_NAME: 'package-name'
+  HAVE_COVERAGE_SCRIPT: 'false'
+  PACKAGE_VERSION: '0.0.0'
+  NPM_VERSION: '0.0.0'
 
 jobs:
   build:
