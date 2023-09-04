@@ -20,14 +20,17 @@ jobs:
     steps:
       - uses: dcarbone/install-jq-action@v1.0.1
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - run: npm ci
+      - run: pnpm i
       # - run: npm test
-      - run: npm run lint
+      - run: pnpm run lint
 
       - name: Get current repo version
         run: |
@@ -39,26 +42,20 @@ jobs:
           echo "NPM_VERSION=$(curl -s https://registry.npmjs.org/${{ env.PACKAGE_NAME }} | jq -r '."dist-tags".latest')" >> $GITHUB_ENV
 
       # code coverage part
-      - run: npm run coverage
+      - name: Run and publish code coverage
         if: |
           github.ref == 'refs/heads/main' &&
           env.CC_TEST_REPORTER_ID != '' &&
-          env.HAVE_COVERAGE_SCRIPT == 'true' &&
-          env.PACKAGE_VERSION != env.NPM_VERSION
-
-      - name: Push coverage to Code Climate Test Reporter
-        if: |
-          github.ref == 'refs/heads/main' &&
-          env.CC_TEST_REPORTER_ID != '' &&
-          env.HAVE_COVERAGE_SCRIPT == 'true' &&
-          env.PACKAGE_VERSION != env.NPM_VERSION
-        uses: aktions/codeclimate-test-reporter@v1
+          env.HAVE_COVERAGE_SCRIPT == 'true'
+        uses: paambaati/codeclimate-action@v4.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ env.CC_TEST_REPORTER_ID }}
         with:
-          codeclimate-test-reporter-id: ${{ env.CC_TEST_REPORTER_ID }}
+          coverageCommand: pnpm run coverage
 
       # npm publish when PR done
       - name: Publish ${{env.PACKAGE_NAME}} ${{env.PACKAGE_VERSION}}
-        run: npm publish --access public
+        run: pnpm publish --access public
         if: |
           github.ref == 'refs/heads/main' &&
           env.NPM_TOKEN != '' &&
