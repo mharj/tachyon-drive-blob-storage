@@ -1,5 +1,5 @@
 import {BlobServiceClient, type BlockBlobClient, type ContainerClient} from '@azure/storage-blob';
-import {type IExternalNotify, type IPersistSerializer, type IStoreProcessor, StorageDriver} from 'tachyon-drive';
+import {type IExternalNotify, type IPersistSerializer, type IStoreProcessor, StorageDriver, TachyonBandwidth} from 'tachyon-drive';
 import type {ILoggerLike} from '@avanio/logger-like';
 import type {Loadable} from '@luolapeikko/ts-common';
 
@@ -7,10 +7,15 @@ export type AzureBlobStorageDriverOptions = {
 	connectionString: Loadable<string>;
 	containerName: Loadable<string>;
 	fileName: Loadable<string>;
+	/** Optional bandwidth settings, defaults to "TachyonBandwidth.VerySmall" because of operation cost */
+	bandwidth?: TachyonBandwidth;
 };
 
 export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> {
-	private readonly blobOptions: Loadable<AzureBlobStorageDriverOptions>;
+	public readonly bandwidth: TachyonBandwidth;
+	private containerName: Loadable<string>;
+	private fileName: Loadable<string>;
+	private connectionString: Loadable<string>;
 	private blobServiceClient: BlobServiceClient | undefined;
 	private containerClient: ContainerClient | undefined;
 	private blockBlobClient: BlockBlobClient | undefined;
@@ -33,7 +38,10 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 		logger?: ILoggerLike | Console,
 	) {
 		super(name, serializer, extNotify || null, processor, logger);
-		this.blobOptions = blobOptions;
+		this.bandwidth = blobOptions.bandwidth || TachyonBandwidth.VerySmall;
+		this.containerName = blobOptions.containerName;
+		this.fileName = blobOptions.fileName;
+		this.connectionString = blobOptions.connectionString;
 	}
 
 	protected async handleInit(): Promise<boolean> {
@@ -69,7 +77,7 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 
 	private async getContainerClient(): Promise<ContainerClient> {
 		if (!this.containerClient) {
-			this.containerClient = (await this.getBlobServiceClient()).getContainerClient(await this.getOption('containerName'));
+			this.containerClient = (await this.getBlobServiceClient()).getContainerClient(await this.getContainerName());
 		}
 		return this.containerClient;
 	}
@@ -78,24 +86,36 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 		if (!this.blockBlobClient) {
 			const containerClient = await this.getContainerClient();
 			await containerClient.createIfNotExists();
-			this.blockBlobClient = containerClient.getBlockBlobClient(await this.getOption('fileName'));
+			this.blockBlobClient = containerClient.getBlockBlobClient(await this.getFileName());
 		}
 		return this.blockBlobClient;
 	}
 
 	private async getBlobServiceClient(): Promise<BlobServiceClient> {
 		if (!this.blobServiceClient) {
-			this.blobServiceClient = BlobServiceClient.fromConnectionString(await this.getOption('connectionString'));
+			this.blobServiceClient = BlobServiceClient.fromConnectionString(await this.getConnectionString());
 		}
 		return this.blobServiceClient;
 	}
 
-	private async getOptions(): Promise<AzureBlobStorageDriverOptions> {
-		return await (typeof this.blobOptions === 'function' ? this.blobOptions() : this.blobOptions);
+	private async getConnectionString(): Promise<string> {
+		if (typeof this.connectionString === 'function') {
+			this.connectionString = this.connectionString();
+		}
+		return this.connectionString;
 	}
 
-	private async getOption(key: keyof AzureBlobStorageDriverOptions): Promise<string> {
-		const option = (await this.getOptions())[key];
-		return await (typeof option === 'function' ? option() : option);
+	private async getContainerName(): Promise<string> {
+		if (typeof this.containerName === 'function') {
+			this.containerName = this.containerName();
+		}
+		return this.containerName;
+	}
+
+	private async getFileName(): Promise<string> {
+		if (typeof this.fileName === 'function') {
+			this.fileName = this.fileName();
+		}
+		return this.fileName;
 	}
 }

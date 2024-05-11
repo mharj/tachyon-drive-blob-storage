@@ -7,6 +7,7 @@
     },
     "plugins": [
         "@typescript-eslint",
+        "@stylistic/ts",
         "prettier",
         "sonarjs",
         "deprecation"
@@ -50,14 +51,14 @@
         ],
         "deprecation/deprecation": "warn",
         "lines-between-class-members": "off",
-        "@typescript-eslint/lines-between-class-members": [
-            "warn",
-            "always",
-            {
-                "exceptAfterOverload": true,
-                "exceptAfterSingleLine": true
-            }
-        ],
+		"@stylistic/ts/lines-between-class-members": [
+			"warn",
+			"always",
+			{
+				"exceptAfterOverload": true,
+				"exceptAfterSingleLine": true
+			}
+		],
         "@typescript-eslint/consistent-type-imports": ["warn", {"prefer": "type-imports", "fixStyle": "inline-type-imports"}]
     }
 }
