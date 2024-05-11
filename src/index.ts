@@ -1,14 +1,16 @@
-import {BlobServiceClient, BlockBlobClient, ContainerClient} from '@azure/storage-blob';
-import {IExternalNotify, IPersistSerializer, IStoreProcessor, StorageDriver} from 'tachyon-drive';
+import {BlobServiceClient, type BlockBlobClient, type ContainerClient} from '@azure/storage-blob';
+import {type IExternalNotify, type IPersistSerializer, type IStoreProcessor, StorageDriver} from 'tachyon-drive';
 import type {ILoggerLike} from '@avanio/logger-like';
+import type {Loadable} from '@luolapeikko/ts-common';
 
-type StringOrAsyncString = string | (() => Promise<string>);
+export type AzureBlobStorageDriverOptions = {
+	connectionString: Loadable<string>;
+	containerName: Loadable<string>;
+	fileName: Loadable<string>;
+};
 
 export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> {
-	private readonly connectionString: StringOrAsyncString;
-	private readonly containerName: StringOrAsyncString;
-	private readonly fileName: StringOrAsyncString;
-
+	private readonly blobOptions: Loadable<AzureBlobStorageDriverOptions>;
 	private blobServiceClient: BlobServiceClient | undefined;
 	private containerClient: ContainerClient | undefined;
 	private blockBlobClient: BlockBlobClient | undefined;
@@ -16,9 +18,7 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 	/**
 	 * AzureBlobStorageDriver
 	 * @param name - name of the driver
-	 * @param connectionString - Azure Blob Storage connection string or aync function to get connection string
-	 * @param containerName  - Azure Blob Storage container name or async function to get container name
-	 * @param fileName - Azure Blob Storage file name or async function to get file name
+	 * @param blobOptions - options for the Azure Blob Storage (connectionString, containerName, fileName)
 	 * @param serializer - serializer to serialize and deserialize data (to and from Buffer)
 	 * @param extNotify - optional external notify service to notify store update events
 	 * @param processor - optional processor to process data (encrypt, decrypt, compress, decompress, etc.)
@@ -26,18 +26,14 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 	 */
 	constructor(
 		name: string,
-		connectionString: StringOrAsyncString,
-		containerName: StringOrAsyncString,
-		fileName: StringOrAsyncString,
+		blobOptions: AzureBlobStorageDriverOptions,
 		serializer: IPersistSerializer<Input, Buffer>,
 		extNotify?: IExternalNotify,
-		processor?: IStoreProcessor<Buffer>,
+		processor?: Loadable<IStoreProcessor<Buffer>>,
 		logger?: ILoggerLike | Console,
 	) {
 		super(name, serializer, extNotify || null, processor, logger);
-		this.containerName = containerName;
-		this.fileName = fileName;
-		this.connectionString = connectionString;
+		this.blobOptions = blobOptions;
 	}
 
 	protected async handleInit(): Promise<boolean> {
@@ -73,8 +69,7 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 
 	private async getContainerClient(): Promise<ContainerClient> {
 		if (!this.containerClient) {
-			const containerName = typeof this.containerName === 'string' ? this.containerName : await this.containerName();
-			this.containerClient = (await this.getBlobServiceClient()).getContainerClient(containerName);
+			this.containerClient = (await this.getBlobServiceClient()).getContainerClient(await this.getOption('containerName'));
 		}
 		return this.containerClient;
 	}
@@ -83,17 +78,24 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 		if (!this.blockBlobClient) {
 			const containerClient = await this.getContainerClient();
 			await containerClient.createIfNotExists();
-			const fileName = typeof this.fileName === 'string' ? this.fileName : await this.fileName();
-			this.blockBlobClient = containerClient.getBlockBlobClient(fileName);
+			this.blockBlobClient = containerClient.getBlockBlobClient(await this.getOption('fileName'));
 		}
 		return this.blockBlobClient;
 	}
 
 	private async getBlobServiceClient(): Promise<BlobServiceClient> {
 		if (!this.blobServiceClient) {
-			const connectionString = typeof this.connectionString === 'string' ? this.connectionString : await this.connectionString();
-			this.blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+			this.blobServiceClient = BlobServiceClient.fromConnectionString(await this.getOption('connectionString'));
 		}
 		return this.blobServiceClient;
+	}
+
+	private async getOptions(): Promise<AzureBlobStorageDriverOptions> {
+		return await (typeof this.blobOptions === 'function' ? this.blobOptions() : this.blobOptions);
+	}
+
+	private async getOption(key: keyof AzureBlobStorageDriverOptions): Promise<string> {
+		const option = (await this.getOptions())[key];
+		return await (typeof option === 'function' ? option() : option);
 	}
 }

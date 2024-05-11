@@ -1,15 +1,9 @@
 {
-    "extends": "./tsconfig.json",
-    "compilerOptions": {
-        "module": "commonjs"
-    },
-    "include": [
-        "test/**/*.ts",
-        "src/**/*.ts"
-    ],
-    "exclude": [
-        "dist/*",
-        "node_modules/*"
-    ],
-    "importHelpers": false
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "./"
+	},
+	"include": ["test/", "src/"],
+	"exclude": ["dist/*", "node_modules/*"],
+	"importHelpers": false
 }

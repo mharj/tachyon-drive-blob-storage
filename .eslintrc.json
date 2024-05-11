@@ -57,6 +57,7 @@
                 "exceptAfterOverload": true,
                 "exceptAfterSingleLine": true
             }
-        ]
+        ],
+        "@typescript-eslint/consistent-type-imports": ["warn", {"prefer": "type-imports", "fixStyle": "inline-type-imports"}]
     }
 }
