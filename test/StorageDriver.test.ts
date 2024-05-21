@@ -18,6 +18,7 @@ const dataSchema = zod.object({
 type Data = zod.infer<typeof dataSchema>;
 
 const bufferSerializer: IPersistSerializer<Data, Buffer> = {
+	name: 'BufferSerializer',
 	serialize: (data: Data) => Buffer.from(JSON.stringify(data)),
 	deserialize: (buffer: Buffer) => JSON.parse(buffer.toString()),
 	validator: (data: Data) => dataSchema.safeParse(data).success,
