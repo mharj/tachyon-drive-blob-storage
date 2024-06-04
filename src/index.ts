@@ -50,7 +50,7 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 		return true;
 	}
 
-	protected async handleUnload(): Promise<boolean> {
+	protected handleUnload(): boolean {
 		this.containerClient = undefined;
 		this.blockBlobClient = undefined;
 		this.blobServiceClient = undefined;

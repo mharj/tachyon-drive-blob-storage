@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import 'mocha';
 import {type ExternalNotifyEventEmitterConstructor, type IExternalNotify, type IPersistSerializer, type IStorageDriver} from 'tachyon-drive';
 import {AzureBlobStorageDriver} from '../src/';
