@@ -1,23 +1,23 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import 'mocha';
-import {type ExternalNotifyEventEmitterConstructor, type IExternalNotify, type IPersistSerializer, type IStorageDriver} from 'tachyon-drive';
-import {AzureBlobStorageDriver} from '../src/';
-import chai from 'chai';
+import * as chai from 'chai';
+import {type ExternalNotifyEventsMap, type IExternalNotify, type IPersistSerializer, type IStorageDriver} from 'tachyon-drive';
+import {AzureBlobStorageDriver} from '../src/index.js';
 import chaiAsPromised from 'chai-as-promised';
 import {CryptoBufferProcessor} from 'tachyon-drive-node-fs';
 import {EventEmitter} from 'events';
-import zod from 'zod';
+import {z} from 'zod';
 
 chai.use(chaiAsPromised);
 
 const expect = chai.expect;
 
-const dataSchema = zod.object({
-	test: zod.string(),
+const dataSchema = z.object({
+	test: z.string(),
 });
 
-type Data = zod.infer<typeof dataSchema>;
+type Data = z.infer<typeof dataSchema>;
 
 const bufferSerializer: IPersistSerializer<Data, Buffer> = {
 	name: 'BufferSerializer',
@@ -26,7 +26,7 @@ const bufferSerializer: IPersistSerializer<Data, Buffer> = {
 	validator: (data: Data) => dataSchema.safeParse(data).success,
 };
 
-class SimpleNotify extends (EventEmitter as ExternalNotifyEventEmitterConstructor) implements IExternalNotify {
+class SimpleNotify extends EventEmitter<ExternalNotifyEventsMap> implements IExternalNotify {
 	private callback = new Set<(timeStamp: Date) => Promise<void>>();
 
 	public init(): Promise<void> {

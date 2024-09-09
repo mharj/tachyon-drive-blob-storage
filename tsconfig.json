@@ -19,5 +19,8 @@
 		"noUnusedLocals": true
 	},
 	"include": ["src/"],
-	"exclude": ["node_modules", "**/*.spec.ts", "test"]
+	"exclude": ["node_modules", "**/*.spec.ts", "test"],
+	"ts-node": {
+		"esm": true
+	}
 }
