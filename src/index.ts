@@ -1,7 +1,7 @@
 import {BlobServiceClient, type BlockBlobClient, type ContainerClient} from '@azure/storage-blob';
 import {type IExternalNotify, type IPersistSerializer, type IStoreProcessor, StorageDriver, TachyonBandwidth} from 'tachyon-drive';
 import type {ILoggerLike} from '@avanio/logger-like';
-import type {Loadable} from '@luolapeikko/ts-common';
+import {type Loadable, resolveLoadable} from '@luolapeikko/ts-common';
 
 export type AzureBlobStorageDriverOptions = {
 	connectionString: Loadable<string>;
@@ -77,7 +77,7 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 
 	private async getContainerClient(): Promise<ContainerClient> {
 		if (!this.containerClient) {
-			this.containerClient = (await this.getBlobServiceClient()).getContainerClient(await this.getContainerName());
+			this.containerClient = (await this.getBlobServiceClient()).getContainerClient(await resolveLoadable(this.containerName));
 		}
 		return this.containerClient;
 	}
@@ -86,36 +86,15 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 		if (!this.blockBlobClient) {
 			const containerClient = await this.getContainerClient();
 			await containerClient.createIfNotExists();
-			this.blockBlobClient = containerClient.getBlockBlobClient(await this.getFileName());
+			this.blockBlobClient = containerClient.getBlockBlobClient(await resolveLoadable(this.fileName));
 		}
 		return this.blockBlobClient;
 	}
 
 	private async getBlobServiceClient(): Promise<BlobServiceClient> {
 		if (!this.blobServiceClient) {
-			this.blobServiceClient = BlobServiceClient.fromConnectionString(await this.getConnectionString());
+			this.blobServiceClient = BlobServiceClient.fromConnectionString(await resolveLoadable(this.connectionString));
 		}
 		return this.blobServiceClient;
-	}
-
-	private async getConnectionString(): Promise<string> {
-		if (typeof this.connectionString === 'function') {
-			this.connectionString = this.connectionString();
-		}
-		return this.connectionString;
-	}
-
-	private async getContainerName(): Promise<string> {
-		if (typeof this.containerName === 'function') {
-			this.containerName = this.containerName();
-		}
-		return this.containerName;
-	}
-
-	private async getFileName(): Promise<string> {
-		if (typeof this.fileName === 'function') {
-			this.fileName = this.fileName();
-		}
-		return this.fileName;
 	}
 }
