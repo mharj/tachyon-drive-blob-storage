@@ -1,6 +1,6 @@
 {
     "name": "tachyon-drive-blob-storage",
-    "version": "0.9.1",
+    "version": "0.10.0",
     "description": "Azure Blob storage driver implementation",
     "type": "module",
     "main": "./dist/index.cjs",
