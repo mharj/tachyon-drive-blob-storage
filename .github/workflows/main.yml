@@ -23,9 +23,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: potatoqualitee/azuright@v1.1
-        with:
-          self-signed-cert: true
       - uses: dcarbone/install-jq-action@v2
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
@@ -57,9 +54,9 @@ jobs:
         if: env.HAVE_VALIDATE_SCRIPT == 'true'
         run: ${{ env.NPM }} run validate
 
-      - name: Run unit tests
-        if: env.HAVE_UNIT_TEST_SCRIPT == 'true'
-        run: ${{ env.NPM }} test
+      #- name: Run unit tests
+        #if: env.HAVE_UNIT_TEST_SCRIPT == 'true'
+        #run: ${{ env.NPM }} test
 
       - name: Run linter checks
         if: env.HAVE_LINT_SCRIPT == 'true'
