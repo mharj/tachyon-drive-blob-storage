@@ -1,17 +1,11 @@
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import 'mocha';
-import * as chai from 'chai';
+import {beforeAll, describe, expect, it} from 'vitest';
 import {type ExternalNotifyEventsMap, type IExternalNotify, type IPersistSerializer, type IStorageDriver} from 'tachyon-drive';
 import {AzureBlobStorageDriver} from '../src/index.js';
-import chaiAsPromised from 'chai-as-promised';
 import {CryptoBufferProcessor} from 'tachyon-drive-node-fs';
 import {EventEmitter} from 'events';
 import {z} from 'zod';
-
-chai.use(chaiAsPromised);
-
-const expect = chai.expect;
 
 const dataSchema = z.object({
 	test: z.string(),
@@ -78,8 +72,7 @@ const data = dataSchema.parse({test: 'demo'});
 describe('StorageDriver', () => {
 	driverSet.forEach((currentDriver) => {
 		describe(currentDriver.name, () => {
-			before(async function () {
-				this.timeout(10000);
+			beforeAll(async function () {
 				await currentDriver.init();
 				await currentDriver.clear();
 				expect(currentDriver.isInitialized).to.be.eq(false);
