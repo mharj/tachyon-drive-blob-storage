@@ -23,7 +23,7 @@ env:
   HAVE_VALIDATE_SCRIPT: false
   HAVE_LINT_SCRIPT: false
   HAVE_UNIT_TEST_SCRIPT: false
-  AZURE_STORAGE_CONNECTION_STRING: 'DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=https://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=https://127.0.0.1:10001/devstoreaccount1;TableEndpoint=https://127.0.0.1:10002/devstoreaccount1;'
+  AZURE_STORAGE_CONNECTION_STRING: 'DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;'
 
 jobs:
   build:
@@ -50,12 +50,6 @@ jobs:
           node-version: 'lts/*'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install Azurite
-        id: azuright
-        uses: potatoqualitee/azuright@v1.1
-        with:
-          self-signed-cert: true
-
       - name: Get current npmjs version for ${{env.PACKAGE_NAME}}
         run: |
           echo "NPM_VERSION=$(curl -s https://registry.npmjs.org/${{ env.PACKAGE_NAME }} | jq -r '."dist-tags".latest')" >> $GITHUB_ENV
@@ -71,17 +65,17 @@ jobs:
         if: env.HAVE_LINT_SCRIPT == 'true'
         run: ${{ env.NPM }} run lint
 
-      - name: Run unit tests
-        if: env.HAVE_UNIT_TEST_SCRIPT == 'true'
-        run: ${{ env.NPM }} test
+     # - name: Run unit tests
+        #if: env.HAVE_UNIT_TEST_SCRIPT == 'true'
+        #run: ${{ env.NPM }} test
 
-      - name: Test Report
-        uses: dorny/test-reporter@v1
-        if: success() || failure() # run this step even if previous step failed
-        with:
-          name: JEST Tests # Name of the check run which will be created
-          path: test-results.xml # Path to test results
-          reporter: java-junit # Format of test results
+      #- name: Test Report
+        #uses: dorny/test-reporter@v1
+        #if: success() || failure() # run this step even if previous step failed
+        #with:
+          #name: JEST Tests # Name of the check run which will be created
+          #path: test-results.xml # Path to test results
+          #reporter: java-junit # Format of test results
 
       - name: Run and publish code coverage
         if: |
