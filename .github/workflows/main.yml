@@ -5,6 +5,11 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 env:
   # Setting an environment variable with the value of a configuration variable
   PUBLISH_BRANCH: 'refs/heads/main'
