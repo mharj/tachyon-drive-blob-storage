@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/require-await */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import {beforeAll, describe, expect, it} from 'vitest';
-import {type ExternalNotifyEventsMap, type IExternalNotify, type IPersistSerializer, type IStorageDriver} from 'tachyon-drive';
-import {AzureBlobStorageDriver} from '../src/index.js';
-import {CryptoBufferProcessor} from 'tachyon-drive-node-fs';
 import {EventEmitter} from 'events';
+import {type ExternalNotifyEventsMap, type IExternalNotify, type IPersistSerializer, type IStorageDriver} from 'tachyon-drive';
+import {CryptoBufferProcessor} from 'tachyon-drive-node-fs';
+import {beforeAll, describe, expect, it} from 'vitest';
 import {z} from 'zod';
+import {AzureBlobStorageDriver} from '../src/index.js';
 
 const dataSchema = z.object({
 	test: z.string(),
@@ -16,7 +14,7 @@ type Data = z.infer<typeof dataSchema>;
 const bufferSerializer: IPersistSerializer<Data, Buffer> = {
 	name: 'BufferSerializer',
 	serialize: (data: Data) => Buffer.from(JSON.stringify(data)),
-	deserialize: (buffer: Buffer) => JSON.parse(buffer.toString()),
+	deserialize: (buffer: Buffer) => JSON.parse(buffer.toString()) as Data,
 	validator: (data: Data) => dataSchema.safeParse(data).success,
 };
 
@@ -48,9 +46,9 @@ const driverSet = new Set<IStorageDriver<Data>>([
 	new AzureBlobStorageDriver(
 		'AzureBlobStorageDriver',
 		{
-			connectionString: async () => emulatorStorageConnectionString,
-			containerName: async () => 'test',
-			fileName: async () => 'test.json',
+			connectionString: () => Promise.resolve(emulatorStorageConnectionString),
+			containerName: () => Promise.resolve('test'),
+			fileName: () => Promise.resolve('test.json'),
 		},
 		bufferSerializer,
 	),

@@ -1,7 +1,7 @@
-import {BlobServiceClient, type BlockBlobClient, type ContainerClient} from '@azure/storage-blob';
-import {type IExternalNotify, type IPersistSerializer, type IStoreProcessor, StorageDriver, TachyonBandwidth} from 'tachyon-drive';
-import {type Loadable, resolveLoadable} from '@luolapeikko/ts-common';
 import type {ILoggerLike} from '@avanio/logger-like';
+import {BlobServiceClient, type BlockBlobClient, type ContainerClient} from '@azure/storage-blob';
+import {type Loadable, resolveLoadable} from '@luolapeikko/ts-common';
+import {type IExternalNotify, type IPersistSerializer, type IStoreProcessor, StorageDriver, TachyonBandwidth} from 'tachyon-drive';
 
 export type AzureBlobStorageDriverOptions = {
 	connectionString: Loadable<string>;
