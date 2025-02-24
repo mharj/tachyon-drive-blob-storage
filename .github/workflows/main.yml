@@ -70,6 +70,14 @@ jobs:
         if: env.HAVE_UNIT_TEST_SCRIPT == 'true'
         run: ${{ env.NPM }} test
 
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: JEST Tests # Name of the check run which will be created
+          path: test-results.xml # Path to test results
+          reporter: jest-junit # Format of test results
+
       - name: Run and publish code coverage
         if: |
           always() &&
