@@ -62,16 +62,17 @@ jobs:
         if: env.HAVE_VALIDATE_SCRIPT == 'true'
         run: ${{ env.NPM }} run validate
 
-      - name: Run unit tests
-        if: env.HAVE_UNIT_TEST_SCRIPT == 'true'
-        run: ${{ env.NPM }} test
-
       - name: Run linter checks
         if: env.HAVE_LINT_SCRIPT == 'true'
         run: ${{ env.NPM }} run lint
 
+      - name: Run unit tests
+        if: env.HAVE_UNIT_TEST_SCRIPT == 'true'
+        run: ${{ env.NPM }} test
+
       - name: Run and publish code coverage
         if: |
+          always() &&
           github.ref == env.PUBLISH_BRANCH &&
           env.CC_TEST_REPORTER_ID != '' &&
           env.HAVE_COVERAGE_SCRIPT == 'true'
