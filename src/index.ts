@@ -37,8 +37,8 @@ export class AzureBlobStorageDriver<Input> extends StorageDriver<Input, Buffer> 
 		processor?: Loadable<IStoreProcessor<Buffer>>,
 		logger?: ILoggerLike | Console,
 	) {
-		super(name, serializer, extNotify || null, processor, logger);
-		this.bandwidth = blobOptions.bandwidth || TachyonBandwidth.VerySmall;
+		super(name, serializer, extNotify ?? null, processor, logger);
+		this.bandwidth = blobOptions.bandwidth ?? TachyonBandwidth.VerySmall;
 		this.containerName = blobOptions.containerName;
 		this.fileName = blobOptions.fileName;
 		this.connectionString = blobOptions.connectionString;
