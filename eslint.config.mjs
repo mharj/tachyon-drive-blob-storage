@@ -40,7 +40,7 @@ export default tseslint.config(
 		settings: {
 			'import/resolver': {
 				typescript: {
-					extensions: ['.mts'],
+					extensions: ['.ts'],
 					moduleDirectory: ['node_modules', 'src/'],
 				},
 			},
